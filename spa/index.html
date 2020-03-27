@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Simple WebApp</title>
+    </head>
+    <body>
+        <p>
+        <input type="text" id="addbirthdayusername" placeholder="username" />
+        <input type="text" id="addbirthdaydob" placeholder="YYYY-MM-DD" />
+        <button id="addbtn">Add birthday</button>
+        </p>
+
+        <p>
+        <input type="text" id="getbirthdayusername" placeholder="username" />
+        <button id="chkbtn">Check birthday</button>        
+        </p>
+
+        <p>Message:</p>
+
+        <p id="message"></p>
+    </body>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script>
+        addbirthdayhandler = function(jqXHR, textStatus) {
+            if(jqXHR['status'] == 200) {
+                if(jqXHR['responseJSON']['status'] == 'success') {
+                    $('#message').html("Birthday successfully recorded")
+                }
+                else {
+                    $('#message').html("Failed adding birthday (2)")
+                }
+            } else {
+                $('#message').html("Failed adding birthday (1)")
+            }
+        }
+
+        chkbirthdayhandler = function(jqXHR, textStatus) {
+            if(jqXHR['status'] == 200) {
+                dob = jqXHR['responseJSON']['dob']
+                days = jqXHR['responseJSON']['days']
+                if(days == 0) {
+                    s = "Happy birthday ! (" + dob + ")"
+                } else {
+                    s = "Birthday is " + dob + ", " + days + " day(s) away"
+                }
+                $('#message').html(s)
+            } else {
+                $('#message').html("Failed retrieving birthday, are you sure username is valid ?")
+            }
+        }
+
+        addbtnclick = function() {
+            $.ajax('{{ API_ENDPOINT }}', {
+                method: 'POST',
+                dataType: 'json',
+                data: JSON.stringify({
+                    username: $('#addbirthdayusername').val(),
+                    dob: $('#addbirthdaydob').val()
+                }),
+                complete: addbirthdayhandler
+            });
+        }
+        $('#addbtn').click(addbtnclick);
+
+        chkbtnclick = function() {
+            $.ajax('{{ API_ENDPOINT }}?username=' + $('#getbirthdayusername').val(), {
+                complete: chkbirthdayhandler
+            });
+        }
+        $('#chkbtn').click(chkbtnclick);
+    </script>
+</html>

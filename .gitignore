@@ -1,0 +1,8 @@
+.terraform
+terraform.tfvars
+*.zip
+archive
+*.ps1
+temp
+terraform.tfstate
+terraform.tfstate.*
