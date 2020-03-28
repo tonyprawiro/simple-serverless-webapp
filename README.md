@@ -133,3 +133,10 @@ PS D:\Users\tonyhadi\project> terraform plan
 PS D:\Users\tonyhadi\project> terraform apply
 ```
 
+# Improvements
+
+- Authentication using Cognito user pool
+
+- Modularize the Terraform scripts
+
+- Orchestrate the build and deploy steps using Jenkins
