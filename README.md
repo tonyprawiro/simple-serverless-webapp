@@ -110,9 +110,9 @@ Compress-Archive -Path getbirthday.py -DestinationPath getbirthday.$build.zip -F
 
 Compress-Archive -Path addbirthday.py -DestinationPath addbirthday.$build.zip -Force
 
-aws s3 cp getbirthday.$build.zip s3://tonyhadi-simple-serverless-lambda-repo/
+aws s3 cp getbirthday.$build.zip s3://<BUCKETNAME>/
 
-aws s3 cp addbirthday.$build.zip s3://tonyhadi-simple-serverless-lambda-repo/
+aws s3 cp addbirthday.$build.zip s3://<BUCKETNAME>/
 ```
 
 ## Terraform
