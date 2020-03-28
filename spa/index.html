@@ -23,15 +23,10 @@
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script>
         addbirthdayhandler = function(jqXHR, textStatus) {
-            if(jqXHR['status'] == 200) {
-                if(jqXHR['responseJSON']['status'] == 'success') {
-                    $('#message').html("Birthday successfully recorded")
-                }
-                else {
-                    $('#message').html("Failed adding birthday (2)")
-                }
+            if(jqXHR['status'] == 204) {
+                $('#message').html("Birthday successfully recorded")
             } else {
-                $('#message').html("Failed adding birthday (1)")
+                $('#message').html("Error. Message: " + jqXHR['responseJSON']['status'])
             }
         }
 
@@ -46,16 +41,15 @@
                 }
                 $('#message').html(s)
             } else {
-                $('#message').html("Failed retrieving birthday, are you sure username is valid ?")
+                $('#message').html("Error. Message: " + jqXHR['responseJSON']['status'])
             }
         }
 
         addbtnclick = function() {
-            $.ajax('{{ API_ENDPOINT }}', {
-                method: 'POST',
+            $.ajax('{{ API_ENDPOINT }}/' + $('#addbirthdayusername').val(), {
+                method: 'PUT',
                 dataType: 'json',
                 data: JSON.stringify({
-                    username: $('#addbirthdayusername').val(),
                     dob: $('#addbirthdaydob').val()
                 }),
                 complete: addbirthdayhandler
@@ -64,7 +58,7 @@
         $('#addbtn').click(addbtnclick);
 
         chkbtnclick = function() {
-            $.ajax('{{ API_ENDPOINT }}?username=' + $('#getbirthdayusername').val(), {
+            $.ajax('{{ API_ENDPOINT }}/' + $('#getbirthdayusername').val(), {
                 complete: chkbirthdayhandler
             });
         }

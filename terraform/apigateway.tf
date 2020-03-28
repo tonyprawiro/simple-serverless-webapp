@@ -1,6 +1,10 @@
+# API GATEWAY ACCOUNT 
+
 resource "aws_api_gateway_account" "apigatewayaccount" {
   cloudwatch_role_arn = aws_iam_role.apigateway_cloudwatch_role.arn
 }
+
+# CLOUDWATCH ROLE
 
 resource "aws_iam_role" "apigateway_cloudwatch_role" {
   name = "api_gateway_cloudwatch_global"
@@ -48,7 +52,7 @@ resource "aws_iam_role_policy" "cloudwatch" {
 EOF
 }
 
-#
+# MAIN
 
 resource "aws_api_gateway_rest_api" "simple_website_api" {
   name        = "simplewebsitebirthdayapi"
@@ -57,178 +61,28 @@ resource "aws_api_gateway_rest_api" "simple_website_api" {
   }
 }
 
+# /birthday [OPTIONS, GET]
 resource "aws_api_gateway_resource" "api_resource_birthday" {
   rest_api_id = aws_api_gateway_rest_api.simple_website_api.id
   parent_id   = aws_api_gateway_rest_api.simple_website_api.root_resource_id
   path_part   = "birthday"
 }
 
-# OPTIONS
-
-resource "aws_api_gateway_method" "apimethod_birthday_options" {
-  rest_api_id   = aws_api_gateway_rest_api.simple_website_api.id
-  resource_id   = aws_api_gateway_resource.api_resource_birthday.id
-  http_method   = "OPTIONS"
-  authorization = "NONE"
-}
-
-resource "aws_api_gateway_integration" "apimethod_birthday_options_request_integration" {
-  rest_api_id          = aws_api_gateway_rest_api.simple_website_api.id
-  resource_id          = aws_api_gateway_resource.api_resource_birthday.id
-  http_method          = aws_api_gateway_method.apimethod_birthday_options.http_method
-  type                 = "MOCK"
-  timeout_milliseconds = 29000
-  request_templates = {
-    "application/json" = jsonencode(
-      {
-        statusCode = 200
-      }
-    )
-  }
-  passthrough_behavior    = "NEVER"
-}
-
-resource "aws_api_gateway_method_response" "apimethod_birthday_options_method_response_200" {
+# /birthday/{username} [OPTIONS, PUT]
+resource "aws_api_gateway_resource" "api_resource_birthday_username" {
   rest_api_id = aws_api_gateway_rest_api.simple_website_api.id
-  resource_id = aws_api_gateway_resource.api_resource_birthday.id
-  http_method = aws_api_gateway_method.apimethod_birthday_options.http_method
-  status_code = "200"
-  response_models = { "application/json" = "Empty" }
-  response_parameters = {
-    "method.response.header.Access-Control-Allow-Headers" = true,
-    "method.response.header.Access-Control-Allow-Methods" = true,
-    "method.response.header.Access-Control-Allow-Origin" = true
-  }
+  parent_id   = aws_api_gateway_resource.api_resource_birthday.id
+  path_part   = "{username}"
 }
 
-resource "aws_api_gateway_integration_response" "apimethod_birthday_options_integration_response" {
-  rest_api_id = aws_api_gateway_rest_api.simple_website_api.id
-  resource_id = aws_api_gateway_resource.api_resource_birthday.id
-  http_method = aws_api_gateway_method.apimethod_birthday_options.http_method
-  status_code = aws_api_gateway_method_response.apimethod_birthday_options_method_response_200.status_code
-  response_templates = {
-    "application/json" = ""
-  }
-  response_parameters = {
-    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
-    "method.response.header.Access-Control-Allow-Methods" = "'GET,OPTIONS,POST'",
-    "method.response.header.Access-Control-Allow-Origin" = "'*'"
-  }
-}
 
-# GET
-
-resource "aws_api_gateway_method" "apimethod_birthday_get" {
-  rest_api_id   = aws_api_gateway_rest_api.simple_website_api.id
-  resource_id   = aws_api_gateway_resource.api_resource_birthday.id
-  http_method   = "GET"
-  authorization = "NONE"
-}
-
-resource "aws_api_gateway_integration" "apimethod_birthday_get_request_integration" {
-  rest_api_id             = aws_api_gateway_rest_api.simple_website_api.id
-  resource_id             = aws_api_gateway_resource.api_resource_birthday.id
-  http_method             = aws_api_gateway_method.apimethod_birthday_get.http_method
-  integration_http_method = "POST" # Lambda can only be invoked using POST
-  type                    = "AWS_PROXY"
-  uri                     = aws_lambda_function.lambda_get_birthday.invoke_arn
-  request_templates = {
-    "application/json" = jsonencode(
-      {
-        statusCode = 200
-      }
-    )
-  }
-  passthrough_behavior    = "NEVER"
-}
-
-resource "aws_api_gateway_method_response" "apimethod_birthday_get_method_response_200" {
-  rest_api_id = aws_api_gateway_rest_api.simple_website_api.id
-  resource_id = aws_api_gateway_resource.api_resource_birthday.id
-  http_method = aws_api_gateway_method.apimethod_birthday_get.http_method
-  status_code = "200"
-  response_models = { "application/json" = "Empty" }
-  response_parameters = {
-    "method.response.header.Access-Control-Allow-Headers" = true,
-    "method.response.header.Access-Control-Allow-Methods" = true,
-    "method.response.header.Access-Control-Allow-Origin" = true
-  }
-}
-
-resource "aws_api_gateway_integration_response" "apimethod_birthday_get_integration_response" {
-  rest_api_id = aws_api_gateway_rest_api.simple_website_api.id
-  resource_id = aws_api_gateway_resource.api_resource_birthday.id
-  http_method = aws_api_gateway_method.apimethod_birthday_get.http_method
-  status_code = aws_api_gateway_method_response.apimethod_birthday_get_method_response_200.status_code
-  response_templates = {
-    "application/json" = ""
-  }
-  response_parameters = {
-    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
-    "method.response.header.Access-Control-Allow-Methods" = "'GET,OPTIONS,POST'",
-    "method.response.header.Access-Control-Allow-Origin" = "'*'"
-  }
-}
-
-# POST
-
-resource "aws_api_gateway_method" "apimethod_birthday_post" {
-  rest_api_id   = aws_api_gateway_rest_api.simple_website_api.id
-  resource_id   = aws_api_gateway_resource.api_resource_birthday.id
-  http_method   = "POST"
-  authorization = "NONE"
-}
-
-resource "aws_api_gateway_integration" "apimethod_birthday_post_request_integration" {
-  rest_api_id             = aws_api_gateway_rest_api.simple_website_api.id
-  resource_id             = aws_api_gateway_resource.api_resource_birthday.id
-  http_method             = aws_api_gateway_method.apimethod_birthday_post.http_method
-  integration_http_method = "POST" # Lambda can only be invoked using POST
-  type                    = "AWS_PROXY"
-  uri                     = aws_lambda_function.lambda_add_birthday.invoke_arn
-  request_templates = {
-    "application/json" = jsonencode(
-      {
-        statusCode = 200
-      }
-    )
-  }
-  passthrough_behavior    = "NEVER"
-}
-
-resource "aws_api_gateway_method_response" "apimethod_birthday_post_method_response_200" {
-  rest_api_id = aws_api_gateway_rest_api.simple_website_api.id
-  resource_id = aws_api_gateway_resource.api_resource_birthday.id
-  http_method = aws_api_gateway_method.apimethod_birthday_post.http_method
-  status_code = "200"
-  response_models = { "application/json" = "Empty" }
-  response_parameters = {
-    "method.response.header.Access-Control-Allow-Headers" = true,
-    "method.response.header.Access-Control-Allow-Methods" = true,
-    "method.response.header.Access-Control-Allow-Origin" = true
-  }
-}
-
-resource "aws_api_gateway_integration_response" "apimethod_birthday_post_integration_response" {
-  rest_api_id = aws_api_gateway_rest_api.simple_website_api.id
-  resource_id = aws_api_gateway_resource.api_resource_birthday.id
-  http_method = aws_api_gateway_method.apimethod_birthday_post.http_method
-  status_code = aws_api_gateway_method_response.apimethod_birthday_post_method_response_200.status_code
-  response_templates = {
-    "application/json" = ""
-  }
-  response_parameters = {
-    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
-    "method.response.header.Access-Control-Allow-Methods" = "'GET,OPTIONS,POST'",
-    "method.response.header.Access-Control-Allow-Origin" = "'*'"
-  }
-}
+# Implementation of each resource in separate files (apigateway_birthday_username.tf)
 
 
 # STAGE & DEPLOYMENT
 
 resource "aws_api_gateway_deployment" "simple_website_deployment" {
-  depends_on = [aws_api_gateway_integration.apimethod_birthday_options_request_integration]
+  depends_on = [aws_api_gateway_integration.apimethod_birthday_username_options_request_integration]
   rest_api_id = aws_api_gateway_rest_api.simple_website_api.id
   stage_name  = "default"
   variables = {
@@ -262,7 +116,7 @@ resource "aws_lambda_permission" "allow_api_gateway_getbirthday" {
     statement_id = "AllowExecutionOfGetBirthdayFromApiGateway"
     action = "lambda:InvokeFunction"
     principal = "apigateway.amazonaws.com"
-    source_arn = "arn:aws:execute-api:${var.region}:${var.account_id}:${aws_api_gateway_rest_api.simple_website_api.id}/*/${aws_api_gateway_integration.apimethod_birthday_get_request_integration.http_method}${aws_api_gateway_resource.api_resource_birthday.path}"
+    source_arn = "arn:aws:execute-api:${var.region}:${var.account_id}:${aws_api_gateway_rest_api.simple_website_api.id}/*/${aws_api_gateway_integration.apimethod_birthday_username_get_request_integration.http_method}${aws_api_gateway_resource.api_resource_birthday.path}/*"
 }
 
 resource "aws_lambda_permission" "allow_api_gateway_addbirthday" {
@@ -270,6 +124,6 @@ resource "aws_lambda_permission" "allow_api_gateway_addbirthday" {
     statement_id = "AllowExecutionOfAddBirthdayFromApiGateway"
     action = "lambda:InvokeFunction"
     principal = "apigateway.amazonaws.com"
-    source_arn = "arn:aws:execute-api:${var.region}:${var.account_id}:${aws_api_gateway_rest_api.simple_website_api.id}/*/${aws_api_gateway_integration.apimethod_birthday_post_request_integration.http_method}${aws_api_gateway_resource.api_resource_birthday.path}"
+    source_arn = "arn:aws:execute-api:${var.region}:${var.account_id}:${aws_api_gateway_rest_api.simple_website_api.id}/*/${aws_api_gateway_integration.apimethod_birthday_username_put_request_integration.http_method}${aws_api_gateway_resource.api_resource_birthday.path}/*"
 }
 
