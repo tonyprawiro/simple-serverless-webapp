@@ -2,24 +2,6 @@
 
 A (very) simple birthday tracker application using serverless services: api gateway, lambda, s3/cloudfront, and dynamodb.
 
-# Use cases
-
-1. User access the application index.html from the Cloudfront distribution endpoint, which subsequently reaches out to Origin (private S3 bucket) using Origin Access Identity. User is presented with simple HTML page, which is a single page application.
-
-![homepage](images/homepage.png)
-
-2. User submits a username and day of birth (DOB). Request is passed on to the API endpoint, which is API Gateway resource with Lambda backend. Lambda function parses the request path parameter to get username, parses the request body to get DOB (JSON format), performs validation, and stores record in DynamoDB table. The function returns 204 No content response if record is successfully added.
-
-![addbirthday_success](images/addbirthday_success.png)
-
-3. User submits a username to retrieve DOB. Request is sent to the API endpoint, which is also API Gateway resource with Lambda backend. Lambda function parses the request path parameter to get username, performs validation, and make GetItem API to DynamoDB table to fetch the record. The function returns DOB and number of days until next birthday, 200 OK if all is good. The client page displays the info, checks if birthday is today and displays "Happy birthday!" if today is the same day of the year as the DOB.
-
-![chkbirthday_success](images/chkbirthday_success.png)
-
-The API returns 400 Error if input is invalid, and 500 Error for any other errors, along with "status" message.
-
-![chkbirthday_success](images/chkbirthday_error.png)
-
 # Architecture
 
 ![architecture](images/architecture.png)
@@ -70,6 +52,24 @@ Singapore region:
 - S3 pricing is based on storage consumed ($0.025/GB/mo) and number of requests ($0.0004/1000 requests)
 
 Based on pricing dimension, the architecture is cost effective for low to reasonably high number of requests.
+
+# Use cases
+
+1. User access the application index.html from the Cloudfront distribution endpoint, which subsequently reaches out to Origin (private S3 bucket) using Origin Access Identity. User is presented with simple HTML page, which is a single page application.
+
+![homepage](images/homepage.png)
+
+2. User submits a username and day of birth (DOB). Request is passed on to the API endpoint, which is API Gateway resource with Lambda backend. Lambda function parses the request path parameter to get username, parses the request body to get DOB (JSON format), performs validation, and stores record in DynamoDB table. The function returns 204 No content response if record is successfully added.
+
+![addbirthday_success](images/addbirthday_success.png)
+
+3. User submits a username to retrieve DOB. Request is sent to the API endpoint, which is also API Gateway resource with Lambda backend. Lambda function parses the request path parameter to get username, performs validation, and make GetItem API to DynamoDB table to fetch the record. The function returns DOB and number of days until next birthday, 200 OK if all is good. The client page displays the info, checks if birthday is today and displays "Happy birthday!" if today is the same day of the year as the DOB.
+
+![chkbirthday_success](images/chkbirthday_success.png)
+
+The API returns 400 Error if input is invalid, and 500 Error for any other errors, along with "status" message.
+
+![chkbirthday_success](images/chkbirthday_error.png)
 
 
 # Repository content and build step
